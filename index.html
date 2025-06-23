@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieFinder Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4cc9f0;
+            --secondary: #3f37c9;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #38b000;
+            --warning: #f72585;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        body.sidebar-open .container {
+            transform: translateX(-300px);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .tagline {
+            font-weight: 300;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .watchlist-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            z-index: 1;
+        }
+        
+        .watchlist-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .watchlist-count {
+            background: var(--warning);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+            gap: 1rem;
+            position: relative;
+        }
+        
+        #name {
+            width: 60%;
+            padding: 1.25rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            background: white;
+            color: var(--dark);
+        }
+        
+        #name::placeholder {
+            color: var(--gray);
+            opacity: 0.7;
+        }
+        
+        #name:focus {
+            outline: none;
+            box-shadow: 0 5px 20px rgba(67, 97, 238, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0 2.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .search-btn:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .movie-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .movie-card:hover .movie-poster {
+            transform: scale(1.03);
+        }
+        
+        .movie-info {
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .movie-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .movie-year {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .movie-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .add-to-watchlist {
+            background: var(--light-gray);
+            color: var(--dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-watchlist:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .imdb-btn {
+            background: #f5c518;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .imdb-btn:hover {
+            background: #e6b800;
+            transform: translateY(-2px);
+        }
+        
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            color: var(--warning);
+            margin-bottom: 1.5rem;
+        }
+        
+        .no-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--light-gray);
+            border-top: 6px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 5rem;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        body.sidebar-open .sidebar {
+            right: 0;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .watchlist-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .watchlist-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .watchlist-poster {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .watchlist-details {
+            flex: 1;
+        }
+        
+        .watchlist-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .watchlist-year {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .remove-from-watchlist {
+            background: none;
+            border: none;
+            color: var(--warning);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .empty-watchlist {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-watchlist i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--light-gray);
+        }
+        
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        body.sidebar-open .overlay {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            header {
+                padding: 1.25rem 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            #name {
+                width: 70%;
+            }
+            
+            .sidebar {
+                width: 320px;
+                right: -320px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .search-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #name {
+                width: 100%;
+            }
+            
+            .search-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 1.25rem;
+            }
+            
+            .results-container {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+            
+            .movie-poster {
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+            }
+            
+            .sidebar {
+                width: 100%;
+                right: -100%;
+            }
+            
+            body.sidebar-open .container {
+                transform: translateX(-100%);
+            }
+            
+            .movie-poster {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>MovieFinder Pro</h1>
+                <p class="tagline">Discover & save your favorite movies</p>
+            </div>
+            <button class="watchlist-btn" id="watchlistBtn">
+                <i class="fas fa-bookmark"></i>
+                Watchlist
+                <span class="watchlist-count" id="watchlistCount">0</span>
+            </button>
+        </header>
+        
+        <div class="search-container">
+            <input type="text" id="name" placeholder="Search for movies...">
+            <button class="search-btn" onclick="searchMovie()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Searching for movies...</p>
+        </div>
+        
+        <div class="results-container" id="results">
+            <!-- Movie results will appear here -->
+        </div>
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Your Watchlist</div>
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="watchlist-items" id="watchlistItems">
+            <!-- Watchlist items will appear here -->
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Movie added to watchlist</span>
+    </div>
+    
+    <footer>
+        <p>© 2023 MovieFinder Pro. All movie data provided by OMDB API.</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const nameInput = document.getElementById('name');
+        const resultsContainer = document.getElementById('results');
+        const loadingElement = document.getElementById('loading');
+        const watchlistBtn = document.getElementById('watchlistBtn');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const watchlistItems = document.getElementById('watchlistItems');
+        const watchlistCount = document.getElementById('watchlistCount');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // State
+        let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        
+        // Initialize
+        updateWatchlistCount();
+        renderWatchlist();
+        
+        // Event Listeners
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMovie();
+            }
+        });
+        
+        watchlistBtn.addEventListener('click', toggleSidebar);
+        closeSidebar.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+        
+        // Functions
+        function searchMovie() {
+            const apiKey = "3d047a27&s"; // Your real OMDb API key
+            const movieName = nameInput.value.trim();
+            
+            if (!movieName) {
+                showToast('Please enter a movie name');
+                return;
+            }
+            
+            const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(movieName)}`;
+            
+            showLoading();
+            clearResults();
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hideLoading();
+                    
+                    if (data.Response === "True") {
+                        renderMovies(data.Search);
+                    } else {
+                        showNoResults(data.Error || 'No movies found');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showNoResults('Error fetching data. Please try again.');
+                    console.error("Fetch error:", error);
+                });
+        }
+        
+        function renderMovies(movies) {
+            resultsContainer.innerHTML = movies.map(movie => `
+                <div class="movie-card" data-id="${movie.imdbID}">
+                    <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Poster'}" 
+                         alt="${movie.Title}" 
+                         class="movie-poster"
+                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.Title}</h3>
+                        <p class="movie-year">${movie.Year}</p>
+                        <div class="movie-actions">
+                            <button class="add-to-watchlist" onclick="addToWatchlist('${movie.imdbID}', '${movie.Title}', '${movie.Year}', '${movie.Poster}')">
+                                <i class="fas fa-plus"></i> Watchlist
+                            </button>
+                            <a href="https://www.imdb.com/title/${movie.imdbID}" target="_blank" class="imdb-btn">
+                                <i class="fab fa-imdb"></i> IMDb
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addToWatchlist(id, title, year, poster) {
+            if (watchlist.some(movie => movie.id === id)) {
+                showToast('Movie already in watchlist');
+                return;
+            }
+            
+            const movie = {
+                id,
+                title,
+                year,
+                poster: poster !== 'N/A' ? poster : 'https://via.placeholder.com/300x450?text=No+Poster'
+            };
+            
+            watchlist.push(movie);
+            saveWatchlist();
+            updateWatchlistCount();
+            renderWatchlist();
+            showToast('Added to watchlist');
+        }
+        
+        function removeFromWatchlist(id) {
+            watchlist = watchlist.filter(movie => movie.id !== id);
+            saveWatchlist();
+            updateWatchlistCount();
+            renderWatchlist();
+            showToast('Removed from watchlist');
+        }
+        
+        function saveWatchlist() {
+            localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        }
+        
+        function renderWatchlist() {
+            if (watchlist.length === 0) {
+                watchlistItems.innerHTML = `
+                    <div class="empty-watchlist">
+                        <i class="far fa-star"></i>
+                        <p>Your watchlist is empty</p>
+                        <p>Add movies to watch later</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            watchlistItems.innerHTML = watchlist.map(movie => `
+                <div class="watchlist-item">
+                    <img src="${movie.poster}" 
+                         alt="${movie.title}" 
+                         class="watchlist-poster"
+                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
+                    <div class="watchlist-details">
+                        <div class="watchlist-title">${movie.title}</div>
+                        <div class="watchlist-year">${movie.year}</div>
+                        <button class="remove-from-watchlist" onclick="removeFromWatchlist('${movie.id}')">
+                            <i class="fas fa-trash-alt"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateWatchlistCount() {
+            watchlistCount.textContent = watchlist.length;
+        }
+        
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-open');
+        }
+        
+        function showLoading() {
+            loadingElement.style.display = 'block';
+        }
+        
+        function hideLoading() {
+            loadingElement.style.display = 'none';
+        }
+        
+        function clearResults() {
+            resultsContainer.innerHTML = '';
+        }
+        
+        function showNoResults(message) {
+            resultsContainer.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-film"></i>
+                    <h3>${message}</h3>
+                    <p>Try another search term</p>
+                </div>
+            `;
+        }
+        
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
